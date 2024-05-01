@@ -1,55 +1,57 @@
-import socket
-import network
-import machine
+import wifi
+import time
+import asyncio
+import socketpool
 
-ssid = 'MicroPython-AP'
-password = '123456789'
 
-led = machine.Pin("LED",machine.Pin.OUT)
 
-ap = network.WLAN(network.AP_IF)
-ap.config(essid=ssid, password=password)
-ap.active(True)
+class SocketManager:
+    def __init__(self, connection_manager):
+        self.connection_manager = connection_manager
+        self.pool = socketpool.SocketPool(wifi.radio)
+        self.socket = None
+        self.socket_initialised = False
 
-while ap.active() == False:
-  pass
+    def create_socket(self):
+        self.socket = self.pool.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.bind((self.device_address, 23))
 
-ap.ifconfig(('192.168.12.1', '255.255.255.0', '192.168.0.1', '0.0.0.0'))
+    async def send_data(self):
+        if self.connection_manager.device_connected:
+            if not self.socket_initialised:
+                pass
+            else:
+                pass
+        await asyncio.sleep(10)
 
-print('Connection successful')
-print(ap.ifconfig())
+class ConnectionManager:
+    def __init__(self):
+        self.device_connected = False
+        self.device_address = None
+        wifi.radio.start_ap(ssid="Astronaut", password="12345678")
+        wifi.radio.start_dhcp_ap()
 
-html = """<!DOCTYPE html>
-<html>
-    <head> <title>Pico W</title> </head>
-    <body> <h1>Pico W</h1>
-        <p>Hello from Pico W.</p>
-    </body>
-</html>
-"""
+    def get_connected_ip(self):
+        stations = wifi.radio.stations_ap
+        if len(stations) == 0:
+            self.device_connected = False
+        elif len(stations) == 1:
+            self.device_connected = True
+            self.device_address = stations[0].ipv4_address
+        else:
+            self.device_connected = False
 
-addr = socket.getaddrinfo('0.0.0.0', 80)[0][-1]
-s = socket.socket()
-s.bind(addr)
-s.listen(1)
+    async def monitor_connections(self):
+        while True:
+            self.get_connected_ip()
+            print(self.device_connected)
+            await asyncio.sleep(1)
 
-print('listening on', addr)
-led.off()
+async def main():
+    print("test")
+    connection_manager = ConnectionManager()
+    socket_manager = SocketManager(connection_manager)
+    asyncio.create_task(connection_manager.monitor_connections())
+    asyncio.create_task(socket_manager.send_data())
 
-# Listen for connections
-while True:
-    try:
-        cl, addr = s.accept()
-        print('client connected from', addr)
-        request = cl.recv(1024)
-        led.on()
-        print(request)
-
-        cl.send('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n')
-        cl.send(html)
-        cl.close()
-        led.off()
-
-    except OSError as e:
-        cl.close()
-        print('connection closed')
+asyncio.run(main())
