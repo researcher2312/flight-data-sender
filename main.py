@@ -1,5 +1,6 @@
-from network_sender import connection_manager, socket_manager
 import asio
+from sensor_reader import DataReader
+from network_sender import ConnectionManager, SocketManager
 
 
 async def main():
