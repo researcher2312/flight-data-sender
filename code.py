@@ -1,4 +1,4 @@
-import asio
+import asyncio
 from sensor_reader import DataReader
 from network_sender import ConnectionManager, SocketManager
 from lights import Lights
@@ -10,7 +10,7 @@ async def main():
     lights = Lights()
     monitor_task = asyncio.create_task(connection_manager.monitor_connections())
     sender_task = asyncio.create_task(socket_manager.send_data())
-    lights.light_up()
+    lights_task = asyncio.create_task(lights.blink())
     await asyncio.gather(monitor_task)
 
 
