@@ -1,17 +1,18 @@
 import board
 import busio
 import asyncio
+from bmo055 import BMO055 as bmo
+from lm75 import LM75
 
-class Sensor:
-    def __init__(self, scl, sda):
-        self.i2c = busio.I2C(pin_data.scl, pin_data.sda)
         
 class DataReader:
     def __init__(self):
-        self.thermometer = Sensor(x, x)
+        self.i2c = busio.I2C(board.GP27, board.GP26)
+        self.thermometer = LM75(self.i2c)
+        self.imu = bmo(self.i2c)
         
-    async def read_data(self):
-        pass
+    def read_data(self):
+        print(self.thermometer.temperature())
     
     async def run_reading(self):
         while True:
