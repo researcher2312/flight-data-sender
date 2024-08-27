@@ -17,7 +17,7 @@ class SocketManager:
         self.address = (str(self.connection_manager.device_address), 1234)
         self.socket.connect(self.address)
         self.socket.settimeout(5)
-    
+
     async def send_data(self):
         while True:
             if self.connection_manager.device_connected:

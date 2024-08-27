@@ -17,6 +17,7 @@ M4G_MODE = 0x0A
 NDOF_FMC_OFF_MODE = 0x0B
 NDOF_MODE = 0x0C
 
+
 class BNO055:
     def __init__(self, i2c):
         self.sensor = adafruit_bno055.BNO055_I2C(i2c, IMU_ADDRESS)
@@ -27,7 +28,9 @@ class BNO055:
     def calibrate_magnetometer(self):
         print("Magnetometer: Perform the figure-eight calibration dance.")
         while not self.sensor.calibration_status[3] == 3:
-            print(f"Mag Calib Status: {100 / 3 * self.sensor.calibration_status[3]:3.0f}%")
+            print(
+                f"Mag Calib Status: {100 / 3 * self.sensor.calibration_status[3]:3.0f}%"
+            )
             time.sleep(1)
         print("... CALIBRATED")
         time.sleep(1)
@@ -44,7 +47,9 @@ class BNO055:
             #    5) x-axis left,  y-axis right, z-axis up
             #    6) x-axis right, y-axis left,  z-axis down
             #   Repeat the steps until calibrated
-            print(f"Accel Calib Status: {100 / 3 * self.sensor.calibration_status[2]:3.0f}%")
+            print(
+                f"Accel Calib Status: {100 / 3 * self.sensor.calibration_status[2]:3.0f}%"
+            )
             time.sleep(1)
         print("... CALIBRATED")
         time.sleep(1)
@@ -55,7 +60,9 @@ class BNO055:
             # Calibration Dance Step Three: Gyroscope
             #  Place sensor in any stable position for a few seconds
             #  (Accelerometer calibration may also calibrate the gyro)
-            print(f"Gyro Calib Status: {100 / 3 * self.sensor.calibration_status[1]:3.0f}%")
+            print(
+                f"Gyro Calib Status: {100 / 3 * self.sensor.calibration_status[1]:3.0f}%"
+            )
             time.sleep(1)
         print("... CALIBRATED")
         time.sleep(1)
