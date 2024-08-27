@@ -18,20 +18,24 @@ class SocketManager:
         self.socket.connect(self.address)
         self.socket.settimeout(5)
 
-    async def send_data(self):
+    def send_data(self, sensor):
+        try:
+            for x in sensor.acceleration:
+                self.socket.send(x)
+        except BrokenPipeError:
+            print("send error")
+        else:
+            print("transmission finished")
+
+    async def send_task(self):
         while True:
             if self.connection_manager.device_connected:
                 if self.address == None:
                     self.create_socket()
                 else:
-                    try:
-                        a = array('i', [1, 2, 3, 4])
-                        self.socket.send(b"teeest1234\n")
-                    except BrokenPipeError:
-                        print("send error")
-                    else:
-                        print("transmission finished")
+                    send_data()
             await asyncio.sleep(10)
+
 
 class ConnectionManager:
     def __init__(self):
@@ -50,7 +54,7 @@ class ConnectionManager:
         else:
             self.device_connected = False
 
-    def monitor_connections(self):
+    async def monitor_connections_task(self):
         while True:
             self.get_connected_ip()
             print(self.device_address)
