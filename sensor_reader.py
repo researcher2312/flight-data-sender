@@ -4,6 +4,7 @@ import asyncio
 from bno_055 import BNO055
 from lm75 import LM75
 
+
 class DataReader:
     def __init__(self):
         self.i2c = busio.I2C(board.GP27, board.GP26)
