@@ -1,8 +1,8 @@
 import wifi
 import time
+import struct
 import asyncio
 import socketpool
-from array import array
 
 
 class SocketManager:
@@ -18,10 +18,16 @@ class SocketManager:
         self.socket.connect(self.address)
         self.socket.settimeout(5)
 
+    def prepare_data(self, sensor):
+        ba = bytearray()
+        for data in sensor.get_all_data():
+            ba.append(struct.pack("f", data))
+        return ba
+
     def send_data(self, sensor):
+        data = self.prepare_data(sensor)
         try:
-            for x in sensor.acceleration:
-                self.socket.send(x)
+            self.socket.send(data)
         except BrokenPipeError:
             print("send error")
         else:
