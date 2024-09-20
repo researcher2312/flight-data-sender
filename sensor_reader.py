@@ -1,4 +1,5 @@
 import board
+import time
 import busio
 import asyncio
 import adafruit_icm20x
@@ -32,7 +33,7 @@ class DataReader:
             print("imu read error")
 
     def get_all_readings(self):
-        return [self.temperature, *self.acceleration, *self.rotation, *self.magnetic]
+        return [time.monotonic(), self.temperature] + list(self.acceleration) + list(self.rotation) + list(self.magnetic)
 
     async def reading_task(self):
         while True:

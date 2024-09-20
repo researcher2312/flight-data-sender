@@ -1,8 +1,8 @@
 import wifi
 import time
-import struct
 import asyncio
 import socketpool
+from array import array
 
 
 class SocketManager:
@@ -13,19 +13,13 @@ class SocketManager:
         self.address = None
 
     def create_socket(self):
-        self.socket = self.pool.socket(self.pool.AF_INET, self.pool.SOCK_STREAM)
+        self.socket = self.pool.socket(self.pool.AF_INET, self.pool.SOCK_DGRAM)
         self.address = (str(self.connection_manager.device_address), 1234)
         self.socket.connect(self.address)
         self.socket.settimeout(5)
 
-    def prepare_data(self, sensor):
-        ba = bytearray()
-        for data in sensor.get_all_data():
-            ba.append(struct.pack("f", data))
-        return ba
-
     def send_data(self, sensor):
-        data = self.prepare_data(sensor)
+        data = array("f", sensor.get_all_readings())
         try:
             self.socket.send(data)
         except BrokenPipeError:
@@ -33,13 +27,13 @@ class SocketManager:
         else:
             print("transmission finished")
 
-    async def send_task(self):
+    async def send_task(self, sensor):
         while True:
             if self.connection_manager.device_connected:
                 if self.address == None:
                     self.create_socket()
                 else:
-                    send_data()
+                    self.send_data(sensor)
             await asyncio.sleep(10)
 
 
