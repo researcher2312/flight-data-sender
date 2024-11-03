@@ -15,7 +15,11 @@ class SocketManager:
     def create_socket(self):
         self.socket = self.pool.socket(self.pool.AF_INET, self.pool.SOCK_DGRAM)
         self.address = (str(self.connection_manager.device_address), 1234)
-        self.socket.connect(self.address)
+        try:
+            self.socket.connect(self.address)
+        except:
+            self.address = None
+            print("connection error")
         self.socket.settimeout(5)
 
     def send_data(self, sensor):
@@ -34,13 +38,15 @@ class SocketManager:
                     self.create_socket()
                 else:
                     self.send_data(sensor)
-            await asyncio.sleep(10)
+                
+            await asyncio.sleep(0.02)
 
 
 class ConnectionManager:
     def __init__(self):
         self.device_connected = False
         self.device_address = None
+        self.connection_missing_counter = 0
         wifi.radio.start_ap(ssid="Astronaut", password="12345678")
 
     def get_connected_ip(self):
@@ -48,14 +54,18 @@ class ConnectionManager:
         if len(stations) == 1:
             self.device_connected = True
             self.device_address = stations[0].ipv4_address
+            self.connection_missing_counter = 0
         elif len(stations) > 1:
             self.device_connected = False
             print("too much connections")
         else:
+            self.connection_missing_counter += 1
+            
+        if self.connection_missing_counter > 10:
             self.device_connected = False
 
     async def monitor_connections_task(self):
         while True:
             self.get_connected_ip()
             print(self.device_address)
-            await asyncio.sleep(1)
+            await asyncio.sleep(2)
